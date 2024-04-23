@@ -6,16 +6,17 @@ pygame.init() #initializes pygame i guess
 
 #---01---SETTING UP GAME WINDOW---
 Window_Width = 800 #window dimensions
-Window_Height = 600
+Window_Height = 800
 Game_Window = pygame.display.set_mode((Window_Width, Window_Height)) #making the window, and giving it dimensions from before --- double brackets when setting a value/changing stuff like colours and sizes for example.
 pygame.display.set_caption("Brick Breaker Battle") #giving the window top bar a title
 
 #---02---COLOUR SCHEME---
 
-Colour_Background = ("light blue") #black colour code
-Colour_Paddle = ("pink") #white colour code
-Colour_Ball = ("light yellow") #testing if words work too
-Colour_Power = ("maroon")
+Colour_Background = ("black") #black colour code
+Colour_Paddle1 = ("blue") #white colour code
+Colour_Paddle2 = ("red") #white colour code
+Colour_Ball1 = ("blue") #testing if words work too
+Colour_Ball2 = ("red") #testing if words work too
 
 #---03---DEFINING PADDLE CLASS---
 
@@ -23,13 +24,16 @@ class Paddle:
     def __init__(self,x,y): 
         self.x = x
         self.y = y
-        self.width = 10
-        self.height = 100
+        self.width = 100
+        self.height = 10
         self.acc = 2
         self.vel = 0.5 #velocity of paddle
 
-    def draw(self):
-        pygame.draw.rect(Game_Window, Colour_Paddle, (self.x, self.y, self.width, self.height)) #drawing a rectangle with all of the customizations applied in order of: window it is present in, colour of object, then the x, and y coordinates, and the width and height of the rectangle
+    def draw1(self):
+        pygame.draw.rect(Game_Window, Colour_Paddle1, (self.x, self.y, self.width, self.height)) #drawing a rectangle with all of the customizations applied in order of: window it is present in, colour of object, then the x, and y coordinates, and the width and height of the rectangle
+
+    def draw2(self):
+        pygame.draw.rect(Game_Window, Colour_Paddle2, (self.x, self.y, self.width, self.height)) 
 
 #---04---DEFINING BALL CLASS---
         
@@ -40,24 +44,28 @@ class Ball:
         self.radius = 10
         self.vel = [random.choice([-0.25, 0.25]), random.choice([-0.25, 0.25])]
 
-    def draw(self):
-        pygame.draw.circle(Game_Window, Colour_Ball, (self.x, self.y), self.radius)
+    def draw1(self):
+        pygame.draw.circle(Game_Window, Colour_Ball1, (self.x, self.y), self.radius)
+    
+    def draw2(self):
+        pygame.draw.circle(Game_Window, Colour_Ball2, (self.x, self.y), self.radius)
 
 #---05---DEFINING POWER CLASS---
 
-class Power:
+'''class Power:
     def __init__ (self,x,y):
         self.x = random.choice([100, Window_Width - 100])
         self.y = random.choice([30, Window_Height - 30])
         self.radius = 15
 
     def draw(self):
-        pygame.draw.circle(Game_Window, Colour_Power, (self.x, self.y), self.radius)
+        pygame.draw.circle(Game_Window, Colour_Power, (self.x, self.y), self.radius)'''
 
 #---06---INITIALIZING GAME OBJECTS---
-Paddle1 = Paddle(50 - 5, Window_Height / 2 - 50) #placing the first paddle in the middle of the screen
-Paddle2 = Paddle(Window_Width - 50 - 5, Window_Height / 2 - 50) #placing the first paddle in the middle of the screen
-Ball1 = Ball(Window_Width / 2 - 5, Window_Height / 2 - 5) #placing the first paddle in the middle of the screen
+Paddle1 = Paddle((Window_Width / 2) + 50, Window_Height * (11 / 12)) #placing the first paddle in the middle of the screen
+Paddle2 = Paddle((Window_Width / 2) + 50, Window_Height * (1 / 12)) #placing the first paddle in the middle of the screen
+Ball1 = Ball(Window_Width / 2 - 5, Window_Height * (4 / 5) - 5) #placing the first paddle in the middle of the screen
+Ball2 = Ball(Window_Width / 2 - 5, Window_Height * (1 / 5) - 5) #placing the first paddle in the middle of the screen
 
 #---0---LOOPING THE WINDOW---
 
@@ -70,40 +78,65 @@ while running:
 
     if keys[pygame.K_a] and Paddle1.x > 0: #w key      K stands for key, and w for w (up)
         Paddle1.x -= Paddle1.vel
-    if keys[pygame.K_d] and Paddle1.x < Window_Width / 2 - Paddle1.width: #s key        k stands for key, and s for s (down)
+    if keys[pygame.K_d] and Paddle1.x < Window_Width - Paddle1.width: #s key        k stands for key, and s for s (down)
         Paddle1.x += Paddle1.vel
 
-    if keys[pygame.K_LEFT] and Paddle2.x > Window_Width / 2: #w key      K stands for key, and w for w (up)
+    if keys[pygame.K_LEFT] and Paddle2.x > 0: #w key      K stands for key, and w for w (up)
         Paddle2.x -= Paddle2.vel
     if keys[pygame.K_RIGHT] and Paddle2.x < Window_Width - Paddle2.width: #s key        k stands for key, and s for s (down)
         Paddle2.x += Paddle2.vel
 
     Ball1.x += Ball1.vel[0]
     Ball1.y += Ball1.vel[1]
-    if Ball1.y < 0 or Ball1.y > Window_Height - Ball1.radius:
-        Ball1.vel[1] *= -1
+    Ball2.x += Ball2.vel[0]
+    Ball2.y += Ball2.vel[1]
+    
+    #---CODING COLLISION FOR THE BLUE BALL---
+    if Ball1.x < 0 or Ball1.x > Window_Width - Ball1.radius:
+        Ball1.vel[0] *= -1
 
-    if Ball1.x < 0 - Ball1.radius or Ball1.x > Window_Width + Ball1.radius:
+    if Ball1.y < 0 - (2 * Ball1.radius) or Ball1.y > Window_Height:
         Ball1.x = Window_Width / 2 - Ball1.radius
-        Ball1.y = Window_Width / 2 - Ball1.radius
-        Ball1.vel[0] = random.choice([-0.25, 0.25])
+        Ball1.y = Window_Width * (4 / 5) - Ball1.radius
+        Ball1.vel[1] = random.choice([-0.25, 0.25])
 
     if Ball1.x <= Paddle1.x + Paddle1.width and Ball1.x >= Paddle1.x and Ball1.y > Paddle1.y and Ball1.y < Paddle1.y + Paddle1.height:#Paddle1.y < Paddle1.y + Paddle1.height:
-        if(Ball1.vel[0] > 0):
-            Ball1.vel[0] += 0.25
+        if(Ball1.vel[1] < 0):
+            Ball1.vel[1] -= 0.25
         else:
-            Ball1.vel[0] *= -1
+            Ball1.vel[1] *= -1
     if Ball1.x >= Paddle2.x and Ball1.x <= Paddle2.x + Paddle1.width and Ball1.y > Paddle2.y and Ball1.y < Paddle2.y + Paddle2.height:
-        if(Ball1.vel[0] < 0):
-            Ball1.vel[0] -= 0.25
+        if(Ball1.vel[1] > 0):
+            Ball1.vel[1] += 0.25
         else:
-            Ball1.vel[0] *= -1
+            Ball1.vel[1] *= -1
+
+    #---CODING COLLISION FOR THE RED BALL---
+    if Ball2.x < 0 or Ball2.x > Window_Width - Ball2.radius:
+        Ball2.vel[0] *= -1
+
+    if Ball2.y < 0 - (2 * Ball2.radius) or Ball2.y > Window_Height:
+        Ball2.x = Window_Width / 2 - Ball2.radius
+        Ball2.y = Window_Width * (1 / 5) - Ball2.radius
+        Ball2.vel[1] = random.choice([-0.25, 0.25])
+
+    if Ball2.x <= Paddle1.x + Paddle1.width and Ball2.x >= Paddle1.x and Ball2.y > Paddle1.y and Ball2.y < Paddle1.y + Paddle1.height:#Paddle1.y < Paddle1.y + Paddle1.height:
+        if(Ball2.vel[1] < 0):
+            Ball2.vel[1] -= 0.25
+        else:
+            Ball2.vel[1] *= -1
+    if Ball2.x >= Paddle2.x and Ball2.x <= Paddle2.x + Paddle1.width and Ball2.y > Paddle2.y and Ball2.y < Paddle2.y + Paddle2.height:
+        if(Ball2.vel[1] > 0):
+            Ball2.vel[1] += 0.25
+        else:
+            Ball2.vel[1] *= -1
 
     #-Drawing Game Objects-
     Game_Window.fill(Colour_Background)
-    Paddle1.draw() #places the paddle in the game window
-    Paddle2.draw()
-    Ball1.draw()
+    Paddle1.draw1() #places the paddle in the game window
+    Paddle2.draw2()
+    Ball1.draw1()
+    Ball2.draw2()
     
     pygame.display.update() #signals the frame to update (in this case, close)
     
