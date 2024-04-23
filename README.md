@@ -4,8 +4,6 @@ Brick Breaker Multiplayer Battle
 Brick Colors and their meanings
 
 Red:
- 
-
 
 Blue:
 
