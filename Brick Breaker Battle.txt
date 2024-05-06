@@ -2,6 +2,14 @@ import pygame #importing the pygame library
 
 import random
 
+import time
+
+import math
+
+import os
+
+from pygame import mixer
+
 pygame.init() #initializes pygame i guess
 
 #---01---SETTING UP GAME WINDOW---
@@ -17,6 +25,11 @@ Colour_Paddle1 = ("blue") #white colour code
 Colour_Paddle2 = ("red") #white colour code
 Colour_Ball1 = ("blue") #testing if words work too
 Colour_Ball2 = ("red") #testing if words work too
+Block1Colour = ("red")
+Block2Colour = ("blue")
+Block3Colour = ("gold")
+Block4Colour = ("purple")
+Block5Colour = ("grey")
 
 #---03---DEFINING PADDLE CLASS---
 
@@ -36,13 +49,14 @@ class Paddle:
         pygame.draw.rect(Game_Window, Colour_Paddle2, (self.x, self.y, self.width, self.height)) 
 
 #---04---DEFINING BALL CLASS---
-        
+
 class Ball:
     def __init__(self,x,y):
-        self.x = Window_Width  / 2
-        self.y = Window_Height / 2
+        self.x = x
+        self.y = y
         self.radius = 10
-        self.vel = [random.choice([-0.25, 0.25]), random.choice([-0.25, 0.25])]
+        self.vel = [(random.randint(-25, 25)) / 100, (random.randint(-25, 25)) / 100]
+
 
     def draw1(self):
         pygame.draw.circle(Game_Window, Colour_Ball1, (self.x, self.y), self.radius)
@@ -61,13 +75,83 @@ class Ball:
     def draw(self):
         pygame.draw.circle(Game_Window, Colour_Power, (self.x, self.y), self.radius)'''
 
+#---06---DEFINING BLOCK CLASSES---
+
+IMG_Path = os.path.join("C:/Users/Owner/Downloads/BrickBreakerBattleAssets/BrickBreakerBattle/Bricks/Red Brick.png")
+
+class Block:
+    def __init__(self,x,y, Colour):
+        self.x = x
+        self.y = y
+        self.Width = 60
+        self.Height = 25
+        self.Colour = Colour
+        self.image = pygame.image.load(IMG_Path)
+
+    def draw(self, surface):
+        #pygame.draw.circle(Game_Window, "red", (self.x, self.y), self.Width, self.Height)
+        surface.blit(self.image, (self.x, self.y))
+
 #---06---INITIALIZING GAME OBJECTS---
 Paddle1 = Paddle((Window_Width / 2) + 50, Window_Height * (11 / 12)) #placing the first paddle in the middle of the screen
-Paddle2 = Paddle((Window_Width / 2) + 50, Window_Height * (1 / 12)) #placing the first paddle in the middle of the screen
-Ball1 = Ball(Window_Width / 2 - 5, Window_Height * (4 / 5) - 5) #placing the first paddle in the middle of the screen
-Ball2 = Ball(Window_Width / 2 - 5, Window_Height * (1 / 5) - 5) #placing the first paddle in the middle of the screen
+Paddle2 = Paddle((Window_Width / 2) + 50, Window_Height * (1 / 12)) #placing the second paddle in the middle of the screen
+Ball1 = Ball(Window_Width / 2 - 5, Window_Height * (3 / 4) - 5) #placing the Blue Ball in the middle of the screen
+Ball2 = Ball(Window_Width / 2 - 5, Window_Height * (1 / 4) - 5) #placing the Red Ball in the middle of the screen
+Block1 = Block("red", 0, Window_Height * (3 / 5)) #placing the first Block on the screen
 
 #---0---LOOPING THE WINDOW---
+
+#--Bunch O' Variables--
+P1Stun = False
+P1StunCounter = 0
+P2Stun = False
+P2StunCounter = 0
+StartGame = False
+Ball1HitTick = 0
+Ball2HitTick = 0
+Blocks = []
+BlockTypes = []
+LastBlock1_1 = -1
+LastBlock2_1 = -1
+LastBlock1_2 = -1
+LastBlock2_2 = -1
+
+BrickLoop = True
+IncVal1 = 0
+XCoordVal = 10
+YCoordVal = Window_Height * (1 / 2) - (2 * Block1.Height)
+
+Paddle1Speed = 0
+Paddle2Speed = 0
+
+SpriteGroup = pygame.sprite.Group()
+
+
+#---INITIALIZING BRICKS---
+while IncVal1 < 63:
+    Blocks.append([int(XCoordVal), int(YCoordVal)])
+    RandomInt = random.randrange(0, 29)
+    if RandomInt >= 0 and RandomInt < 10:
+        BlockTypes.append("C:/Users/Owner/Downloads/BrickBreakerBattleAssets/BrickBreakerBattle/Bricks/Red Brick.png")
+    elif RandomInt < 20:
+        BlockTypes.append("C:/Users/Owner/Downloads/BrickBreakerBattleAssets/BrickBreakerBattle/Bricks/Blue Brick.png")
+    elif RandomInt < 24:
+        BlockTypes.append("C:/Users/Owner/Downloads/BrickBreakerBattleAssets/BrickBreakerBattle/Bricks/Black Brick.png")
+    elif RandomInt < 28:
+        BlockTypes.append("C:/Users/Owner/Downloads/BrickBreakerBattleAssets/BrickBreakerBattle/Bricks/Purple Brick.png")
+    else:
+        BlockTypes.append("C:/Users/Owner/Downloads/BrickBreakerBattleAssets/BrickBreakerBattle/Bricks/Gold Brick.png")
+    #BlockTypes.append(random.choice(["Red", "Red", "Red", "Red", "Red", "Red", "Red", "Red", "Red", "Red", "Blue", "Blue", "Blue", "Blue", "Blue", "Blue", "Blue", "Blue", "Blue", "Blue", "Gold", "Purple", "Purple", "Purple", "Grey", "Grey", "Grey"]))
+    XCoordVal += Block1.Width
+    if XCoordVal + Block1.Width > Window_Width:
+        print((YCoordVal - (Window_Height / 2) + (2 * Block1.Height)) / Block1.Height)
+        if (((YCoordVal - (Window_Height / 2) + (2 * Block1.Height)) / Block1.Height) % 2) == 0:
+            XCoordVal = (Block1.Width / 2) + 10
+            print("this works?")
+        else:
+            XCoordVal = 10
+        YCoordVal += Block1.Height
+    IncVal1 += 1
 
 running = True
 while running:
@@ -76,28 +160,77 @@ while running:
             running = False #setting the value that continues the loop to false, this ending the game loop
     keys = pygame.key.get_pressed()
 
-    if keys[pygame.K_a] and Paddle1.x > 0: #w key      K stands for key, and w for w (up)
-        Paddle1.x -= Paddle1.vel
-    if keys[pygame.K_d] and Paddle1.x < Window_Width - Paddle1.width: #s key        k stands for key, and s for s (down)
-        Paddle1.x += Paddle1.vel
+    if keys[pygame.K_SPACE]:
+        StartGame = True
 
-    if keys[pygame.K_LEFT] and Paddle2.x > 0: #w key      K stands for key, and w for w (up)
-        Paddle2.x -= Paddle2.vel
-    if keys[pygame.K_RIGHT] and Paddle2.x < Window_Width - Paddle2.width: #s key        k stands for key, and s for s (down)
-        Paddle2.x += Paddle2.vel
+    if StartGame == True:
+        if keys[pygame.K_a] and Paddle1.x > 0: #w key      K stands for key, and w for w (up)
+            if P1Stun == False:
+                if Paddle1Speed > (-1 * Paddle1.vel):
+                    Paddle1Speed -= Paddle1.vel / 250
+                else:
+                    Paddle1Speed = -1 * Paddle1.vel
+                Paddle1.x += Paddle1Speed
+        if keys[pygame.K_d] and Paddle1.x < Window_Width - Paddle1.width: #s key        k stands for key, and s for s (down)
+            if P1Stun == False:
+                if Paddle1Speed < Paddle1.vel:
+                    Paddle1Speed += Paddle1.vel / 250
+                else:
+                    Paddle1Speed = Paddle1.vel
+                Paddle1.x += Paddle1Speed
 
-    Ball1.x += Ball1.vel[0]
-    Ball1.y += Ball1.vel[1]
-    Ball2.x += Ball2.vel[0]
-    Ball2.y += Ball2.vel[1]
+        if keys[pygame.K_LEFT] and Paddle2.x > 0: #w key      K stands for key, and w for w (up)
+            if P2Stun == False:
+                if Paddle2Speed > 0:
+                    Paddle2Speed = 0
+                elif Paddle2Speed > (-1 * Paddle2.vel):
+                    Paddle2Speed -= Paddle2.vel / 250
+                else:
+                    Paddle2Speed = -1 * Paddle2.vel
+                Paddle2.x += Paddle2Speed
+        if keys[pygame.K_RIGHT] and Paddle2.x < Window_Width - Paddle2.width: #s key        k stands for key, and s for s (down)
+            if P2Stun == False:
+                if Paddle2Speed < 0:
+                    Paddle2Speed = 0
+                elif Paddle2Speed < Paddle2.vel:
+                    Paddle2Speed += Paddle2.vel / 250
+                else:
+                    Paddle2Speed = Paddle2.vel
+                Paddle2.x += Paddle2Speed
+
+        Ball1.x += Ball1.vel[0]
+        Ball1.y += Ball1.vel[1]
+        Ball2.x += Ball2.vel[0]
+        Ball2.y += Ball2.vel[1]
     
+    if P1StunCounter < 1000 and P1Stun == True:
+        P1StunCounter += 1
+    elif P1StunCounter >= 500 and P1Stun == True:
+        P1Stun = False
+        P1StunCounter = 0
+    if P2StunCounter < 1000 and P2Stun == True:
+        P2StunCounter += 1
+    elif P2StunCounter >= 500 and P2Stun == True:
+        P2Stun = False
+        P2StunCounter = 0
+
+    Game_Window.fill(Colour_Background)
+
+    #---ADDING BRICKS---
+    IncVal2 = 0
+    for pos in Blocks[0:]:
+        IMG_Path = BlockTypes[IncVal2]
+        #SpriteGroup.add(IMG_Path)
+        pygame.draw.rect(Game_Window, IMG_Path, pygame.rect(Blocks[IncVal2][0], Blocks[IncVal2][1], Block1.Width, Block1.Height))
+        IncVal2 += 1
+
     #---CODING COLLISION FOR THE BLUE BALL---
     if Ball1.x < 0 or Ball1.x > Window_Width - Ball1.radius:
         Ball1.vel[0] *= -1
 
     if Ball1.y < 0 - (2 * Ball1.radius) or Ball1.y > Window_Height:
         Ball1.x = Window_Width / 2 - Ball1.radius
-        Ball1.y = Window_Width * (4 / 5) - Ball1.radius
+        Ball1.y = Window_Width * (3 / 4) - Ball1.radius
         Ball1.vel[1] = random.choice([-0.25, 0.25])
 
     if Ball1.x <= Paddle1.x + Paddle1.width and Ball1.x >= Paddle1.x and Ball1.y > Paddle1.y and Ball1.y < Paddle1.y + Paddle1.height:#Paddle1.y < Paddle1.y + Paddle1.height:
@@ -106,10 +239,7 @@ while running:
         else:
             Ball1.vel[1] *= -1
     if Ball1.x >= Paddle2.x and Ball1.x <= Paddle2.x + Paddle1.width and Ball1.y > Paddle2.y and Ball1.y < Paddle2.y + Paddle2.height:
-        if(Ball1.vel[1] > 0):
-            Ball1.vel[1] += 0.25
-        else:
-            Ball1.vel[1] *= -1
+        P2Stun = True
 
     #---CODING COLLISION FOR THE RED BALL---
     if Ball2.x < 0 or Ball2.x > Window_Width - Ball2.radius:
@@ -117,27 +247,91 @@ while running:
 
     if Ball2.y < 0 - (2 * Ball2.radius) or Ball2.y > Window_Height:
         Ball2.x = Window_Width / 2 - Ball2.radius
-        Ball2.y = Window_Width * (1 / 5) - Ball2.radius
+        Ball2.y = Window_Width * (1 / 4) - Ball2.radius
         Ball2.vel[1] = random.choice([-0.25, 0.25])
 
     if Ball2.x <= Paddle1.x + Paddle1.width and Ball2.x >= Paddle1.x and Ball2.y > Paddle1.y and Ball2.y < Paddle1.y + Paddle1.height:#Paddle1.y < Paddle1.y + Paddle1.height:
-        if(Ball2.vel[1] < 0):
-            Ball2.vel[1] -= 0.25
-        else:
-            Ball2.vel[1] *= -1
-    if Ball2.x >= Paddle2.x and Ball2.x <= Paddle2.x + Paddle1.width and Ball2.y > Paddle2.y and Ball2.y < Paddle2.y + Paddle2.height:
-        if(Ball2.vel[1] > 0):
-            Ball2.vel[1] += 0.25
-        else:
-            Ball2.vel[1] *= -1
+        P1Stun = True
 
+    if Ball2.x >= Paddle2.x and Ball2.x <= Paddle2.x + Paddle1.width and Ball2.y > Paddle2.y and Ball2.y < Paddle2.y + Paddle2.height:
+        if Ball2HitTick > 0:
+            Ball2.vel[0] = (Ball2.x - (Paddle2.x + (Paddle2.width / 2))) / 75
+            print(Ball2.vel[0])
+        else:
+            Ball2HitTick += 1
+            if Ball2HitTick >= 100:
+                Ball2HitTick = 0
+        Ball2.vel[1] *= -1
+
+    #---BALL COLLISION WITH BLOCKS---
+    if Ball1.y + Ball1.radius > Blocks[0][1] and Ball1.y < Blocks[len(Blocks) - 1][1] + Block1.Height: 
+        IncVal3 = 0
+        for pos in Blocks[0:]:
+            if IncVal3 < len(BlockTypes) and Ball1.x + (2 * Ball1.radius) > Blocks[IncVal3][0] and Ball1.x < Blocks[IncVal3][0] + Block1.Width and Ball1.y + (2 * Ball1.radius) > Blocks[IncVal3][1] and Ball1.y < Blocks[IncVal3][1] + Block1.Height:
+                if IncVal3 != LastBlock1_1: 
+                    if LastBlock1_1 != LastBlock1_2:
+                        LastBlock1_2 = LastBlock1_1
+                    LastBlock1_1 = IncVal3   
+                    Ball1.vel[1] *= -1
+                    if BlockTypes[IncVal3] == "Red":
+                        BlockTypes[IncVal3] = "darkred"
+                        print("red")
+                    elif BlockTypes[IncVal3] == "Blue":
+                        BlockTypes[IncVal3] = "darkblue"
+                        print("blue")
+                    elif BlockTypes[IncVal3] == "Gold":
+                        BlockTypes[IncVal3] = "goldenrod"
+                        print("gold")
+                    elif BlockTypes[IncVal3] == "Purple":
+                        BlockTypes[IncVal3] = "indigo"
+                        print("purple")
+                    elif BlockTypes[IncVal3] == "Grey":
+                        BlockTypes[IncVal3] = "dimgrey"
+                        print("grey")
+                    else:
+                        Blocks.pop([IncVal3][0])
+                        BlockTypes.pop([IncVal3][0])
+                    IncVal3 = 0
+            IncVal3 += 1
+    if Ball2.y + Ball2.radius > Blocks[0][1] and Ball2.y < Blocks[len(Blocks) - 1][1] + Block1.Height:
+        IncVal4 = 0
+        for pos in Blocks[0:]:
+            if IncVal4 < len(BlockTypes) and Ball2.x + (2 * Ball2.radius) > Blocks[IncVal4][0] and Ball2.x < Blocks[IncVal4][0] + Block1.Width and Ball2.y + (2 * Ball2.radius) > Blocks[IncVal4][1] and Ball2.y < Blocks[IncVal4][1] + Block1.Height:
+                if IncVal4 != LastBlock2_1:    
+                    if LastBlock2_1 != LastBlock2_2:
+                        LastBlock2_2 = LastBlock2_1
+                    LastBlock2_1 = IncVal4
+                    Ball2.vel[1] *= -1
+                    if BlockTypes[IncVal4] == "Red":
+                        BlockTypes[IncVal4] = "darkred"
+                        print("red")
+                    elif BlockTypes[IncVal4] == "Blue":
+                        BlockTypes[IncVal4] = "darkblue"
+                        print("blue")
+                    elif BlockTypes[IncVal4] == "Gold":
+                        BlockTypes[IncVal4] = "goldenrod"
+                        print("gold")
+                    elif BlockTypes[IncVal4] == "Purple":
+                        BlockTypes[IncVal4] = "indigo"
+                        print("purple")
+                    elif BlockTypes[IncVal4] == "Grey":
+                        BlockTypes[IncVal4] = "dimgrey"
+                        print("grey")
+                    else:
+                        Blocks.pop([IncVal4][0])
+                        BlockTypes.pop([IncVal4][0])
+                    IncVal4 = 0
+            IncVal4 += 1
     #-Drawing Game Objects-
-    Game_Window.fill(Colour_Background)
     Paddle1.draw1() #places the paddle in the game window
     Paddle2.draw2()
     Ball1.draw1()
     Ball2.draw2()
     
     pygame.display.update() #signals the frame to update (in this case, close)
+
+    '''fps = pygame.time.Clock()
+
+    fps.tick(1)'''
     
 pygame.quit()
