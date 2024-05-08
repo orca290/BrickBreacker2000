@@ -40,7 +40,7 @@ class Paddle:
         self.width = 100
         self.height = 10
         self.acc = 2
-        self.vel = 0.5 #velocity of paddle
+        self.vel = 5 #velocity of paddle
 
     def draw1(self):
         pygame.draw.rect(Game_Window, Colour_Paddle1, (self.x, self.y, self.width, self.height)) #drawing a rectangle with all of the customizations applied in order of: window it is present in, colour of object, then the x, and y coordinates, and the width and height of the rectangle
@@ -49,13 +49,12 @@ class Paddle:
         pygame.draw.rect(Game_Window, Colour_Paddle2, (self.x, self.y, self.width, self.height)) 
 
 #---04---DEFINING BALL CLASS---
-
 class Ball:
-    def __init__(self,x,y):
+    def __init__(self, x, y):
         self.x = x
         self.y = y
         self.radius = 10
-        self.vel = [(random.randint(-25, 25)) / 100, (random.randint(-25, 25)) / 100]
+        self.vel = [0, 0]
 
 
     def draw1(self):
@@ -125,8 +124,53 @@ Paddle1Speed = 0
 Paddle2Speed = 0
 
 SpriteGroup = pygame.sprite.Group()
+#---CODING POWERUP DROPS---
+PowerPlayerVal = 0
+PowerSubNum = 0
+PowerGroup1 = []
+PowerGroup1Type = []
+PowerGroup2 = []
+PowerGroup2Type = []
+Power1Vel = -3
+Power2Vel = 3
+def Powerup():
+    if PowerPlayerVal == 1:
+        if PowerSubNum == 1:
+            PowerGroup1.append([])
 
-
+#---INITIALIZING BALL VELOCITIES---
+def AlterBall1Vel():
+    XSpeed1 = 0
+    XLoop1 = True
+    while XLoop1:
+        XSpeed1 = (random.randint(-25, 25)) / 5
+        if XSpeed1 <= 1 and XSpeed1 >= -1:
+            XLoop1 = True
+        else:
+            XLoop1 = False
+        print("bruh" + str(XSpeed1))
+    if XSpeed1 <= 0:
+        YSpeed1 = 25 + XSpeed1
+    else:
+        YSpeed1 = 25 - XSpeed1
+    Ball1.vel[0] = XSpeed1
+    Ball1.vel[1] = YSpeed1
+def AlterBall2Vel():
+    XSpeed2 = 0
+    XLoop2 = True
+    while XLoop2:
+        XSpeed2 = (random.randint(-25, 25)) / 5
+        if XSpeed2 <= 1 and XSpeed2 >= -1:
+            XLoop2 = True
+        else:
+            XLoop2 = False
+        print("bruh")
+    if XSpeed2 <= 0:
+        YSpeed2 = 25 + XSpeed2
+    else:
+        YSpeed2 = 25 - XSpeed2
+    Ball2.vel[0] = XSpeed2
+    Ball2.vel[1] = YSpeed2
 #---INITIALIZING BRICKS---
 while IncVal1 < 63:
     Blocks.append([int(XCoordVal), int(YCoordVal)])
@@ -140,7 +184,7 @@ while IncVal1 < 63:
     elif RandomInt < 28:
         BlockTypes.append("C:/Users/Owner/Downloads/BrickBreakerBattleAssets/BrickBreakerBattle/Bricks/Purple Brick.png")
     else:
-        BlockTypes.append("C:/Users/Owner/Downloads/BrickBreakerBattleAssets/BrickBreakerBattle/Bricks/Gold Brick.png")
+        BlockTypes.append("C:/Users/Owner/Downloads/BrickBreakerBattleAssets/BrickBreakerBattle/Bricks/Golden Brick.png")
     #BlockTypes.append(random.choice(["Red", "Red", "Red", "Red", "Red", "Red", "Red", "Red", "Red", "Red", "Blue", "Blue", "Blue", "Blue", "Blue", "Blue", "Blue", "Blue", "Blue", "Blue", "Gold", "Purple", "Purple", "Purple", "Grey", "Grey", "Grey"]))
     XCoordVal += Block1.Width
     if XCoordVal + Block1.Width > Window_Width:
@@ -154,6 +198,8 @@ while IncVal1 < 63:
     IncVal1 += 1
 
 running = True
+AlterBall1Vel()
+AlterBall2Vel()
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -166,15 +212,19 @@ while running:
     if StartGame == True:
         if keys[pygame.K_a] and Paddle1.x > 0: #w key      K stands for key, and w for w (up)
             if P1Stun == False:
-                if Paddle1Speed > (-1 * Paddle1.vel):
-                    Paddle1Speed -= Paddle1.vel / 250
+                if Paddle1Speed > 0:
+                    Paddle1Speed = 0
+                elif Paddle1Speed > (-1 * Paddle1.vel):
+                    Paddle1Speed -= Paddle1.vel / 50
                 else:
                     Paddle1Speed = -1 * Paddle1.vel
                 Paddle1.x += Paddle1Speed
         if keys[pygame.K_d] and Paddle1.x < Window_Width - Paddle1.width: #s key        k stands for key, and s for s (down)
             if P1Stun == False:
-                if Paddle1Speed < Paddle1.vel:
-                    Paddle1Speed += Paddle1.vel / 250
+                if Paddle1Speed > 0:
+                    Paddle1Speed = 0
+                elif Paddle1Speed < Paddle1.vel:
+                    Paddle1Speed += Paddle1.vel / 50
                 else:
                     Paddle1Speed = Paddle1.vel
                 Paddle1.x += Paddle1Speed
@@ -184,7 +234,7 @@ while running:
                 if Paddle2Speed > 0:
                     Paddle2Speed = 0
                 elif Paddle2Speed > (-1 * Paddle2.vel):
-                    Paddle2Speed -= Paddle2.vel / 250
+                    Paddle2Speed -= Paddle2.vel / 50
                 else:
                     Paddle2Speed = -1 * Paddle2.vel
                 Paddle2.x += Paddle2Speed
@@ -193,7 +243,7 @@ while running:
                 if Paddle2Speed < 0:
                     Paddle2Speed = 0
                 elif Paddle2Speed < Paddle2.vel:
-                    Paddle2Speed += Paddle2.vel / 250
+                    Paddle2Speed += Paddle2.vel / 50
                 else:
                     Paddle2Speed = Paddle2.vel
                 Paddle2.x += Paddle2Speed
@@ -219,10 +269,24 @@ while running:
     #---ADDING BRICKS---
     IncVal2 = 0
     for pos in Blocks[0:]:
-        IMG_Path = BlockTypes[IncVal2]
+        IMG_Path = pygame.image.load(BlockTypes[IncVal2])
         #SpriteGroup.add(IMG_Path)
-        pygame.draw.rect(Game_Window, IMG_Path, pygame.rect(Blocks[IncVal2][0], Blocks[IncVal2][1], Block1.Width, Block1.Height))
+        Game_Window.blit(IMG_Path, (Blocks[IncVal2][0], Blocks[IncVal2][1]))
+        #pygame.draw.rect(Game_Window, IMG_Path, pygame.rect(Blocks[IncVal2][0], Blocks[IncVal2][1], Block1.Width, Block1.Height))
         IncVal2 += 1
+
+    #---MOVING POWERUPS---
+    PowerIncVal = 0
+    if int(len(PowerGroup1)) > int(len(PowerGroup2)):
+        for pos in PowerGroup1[0:]:
+            PowerGroup1[PowerIncVal][1] += Power1Vel
+            PowerGroup2[PowerIncVal][1] += Power2Vel
+            PowerIncVal += 1
+    else:
+        for pos in PowerGroup2[0:]:
+            PowerGroup1[PowerIncVal][1] += Power1Vel
+            PowerGroup2[PowerIncVal][1] += Power2Vel
+            PowerIncVal += 1
 
     #---CODING COLLISION FOR THE BLUE BALL---
     if Ball1.x < 0 or Ball1.x > Window_Width - Ball1.radius:
@@ -248,14 +312,14 @@ while running:
     if Ball2.y < 0 - (2 * Ball2.radius) or Ball2.y > Window_Height:
         Ball2.x = Window_Width / 2 - Ball2.radius
         Ball2.y = Window_Width * (1 / 4) - Ball2.radius
-        Ball2.vel[1] = random.choice([-0.25, 0.25])
+        AlterBall2Vel()
 
     if Ball2.x <= Paddle1.x + Paddle1.width and Ball2.x >= Paddle1.x and Ball2.y > Paddle1.y and Ball2.y < Paddle1.y + Paddle1.height:#Paddle1.y < Paddle1.y + Paddle1.height:
         P1Stun = True
 
     if Ball2.x >= Paddle2.x and Ball2.x <= Paddle2.x + Paddle1.width and Ball2.y > Paddle2.y and Ball2.y < Paddle2.y + Paddle2.height:
         if Ball2HitTick > 0:
-            Ball2.vel[0] = (Ball2.x - (Paddle2.x + (Paddle2.width / 2))) / 75
+            Ball2.vel[0] = (Ball2.x - (Paddle2.x + (Paddle2.width / 2))) / 250
             print(Ball2.vel[0])
         else:
             Ball2HitTick += 1
