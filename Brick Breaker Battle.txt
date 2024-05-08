@@ -19,7 +19,6 @@ Game_Window = pygame.display.set_mode((Window_Width, Window_Height)) #making the
 pygame.display.set_caption("Brick Breaker Battle") #giving the window top bar a title
 
 #---02---COLOUR SCHEME---
-
 Colour_Background = ("black") #black colour code
 Colour_Paddle1 = ("blue") #white colour code
 Colour_Paddle2 = ("red") #white colour code
@@ -31,8 +30,14 @@ Block3Colour = ("gold")
 Block4Colour = ("purple")
 Block5Colour = ("grey")
 
-#---03---DEFINING PADDLE CLASS---
+#---BACKGROUND MUSIC---
+bm = pygame.mixer.Sound('C:\\Users\calebt84\\Downloads\\BBB\\Brick Breaker Battles Sounds\\background_music.mp3')
+bm.play(loops= 100, maxtime= 0, fade_ms= 0)
 
+#---Sound effects---
+BH = pygame.mixer.Sound('C:\\Users\\calebt84\\Downloads\\BBB\\Brick Breaker Battles Sounds\\Brick_hit.mp3')
+
+#---03---DEFINING PADDLE CLASS---
 class Paddle:
     def __init__(self,x,y): 
         self.x = x
@@ -64,7 +69,6 @@ class Ball:
         pygame.draw.circle(Game_Window, Colour_Ball2, (self.x, self.y), self.radius)
 
 #---05---DEFINING POWER CLASS---
-
 '''class Power:
     def __init__ (self,x,y):
         self.x = random.choice([100, Window_Width - 100])
@@ -75,8 +79,7 @@ class Ball:
         pygame.draw.circle(Game_Window, Colour_Power, (self.x, self.y), self.radius)'''
 
 #---06---DEFINING BLOCK CLASSES---
-
-IMG_Path = os.path.join("C:/Users/Owner/Downloads/BrickBreakerBattleAssets/BrickBreakerBattle/Bricks/Red Brick.png")
+IMG_Path = os.path.join('C:\\Users\\calebt84\\Downloads\\BBB\\BrickBreakerBattle\\Bricks\\Red Brick.png')
 
 class Block:
     def __init__(self,x,y, Colour):
@@ -97,7 +100,6 @@ Paddle2 = Paddle((Window_Width / 2) + 50, Window_Height * (1 / 12)) #placing the
 Ball1 = Ball(Window_Width / 2 - 5, Window_Height * (3 / 4) - 5) #placing the Blue Ball in the middle of the screen
 Ball2 = Ball(Window_Width / 2 - 5, Window_Height * (1 / 4) - 5) #placing the Red Ball in the middle of the screen
 Block1 = Block("red", 0, Window_Height * (3 / 5)) #placing the first Block on the screen
-
 #---0---LOOPING THE WINDOW---
 
 #--Bunch O' Variables--
@@ -176,15 +178,15 @@ while IncVal1 < 63:
     Blocks.append([int(XCoordVal), int(YCoordVal)])
     RandomInt = random.randrange(0, 29)
     if RandomInt >= 0 and RandomInt < 10:
-        BlockTypes.append("C:/Users/Owner/Downloads/BrickBreakerBattleAssets/BrickBreakerBattle/Bricks/Red Brick.png")
+        BlockTypes.append('C:\\Users\\calebt84\\Downloads\\BBB\\BrickBreakerBattle\\Bricks\\Red Brick.png')
     elif RandomInt < 20:
-        BlockTypes.append("C:/Users/Owner/Downloads/BrickBreakerBattleAssets/BrickBreakerBattle/Bricks/Blue Brick.png")
+        BlockTypes.append('C:\\Users\\calebt84\\Downloads\\BBB\\BrickBreakerBattle\\Bricks\\Blue Brick.png')
     elif RandomInt < 24:
-        BlockTypes.append("C:/Users/Owner/Downloads/BrickBreakerBattleAssets/BrickBreakerBattle/Bricks/Black Brick.png")
+        BlockTypes.append('C:\\Users\\calebt84\\Downloads\\BBB\\BrickBreakerBattle\\Bricks\\Black Brick.png')
     elif RandomInt < 28:
-        BlockTypes.append("C:/Users/Owner/Downloads/BrickBreakerBattleAssets/BrickBreakerBattle/Bricks/Purple Brick.png")
+        BlockTypes.append('C:\\Users\\calebt84\\Downloads\\BBB\\BrickBreakerBattle\\Bricks\\Purple Brick.png')
     else:
-        BlockTypes.append("C:/Users/Owner/Downloads/BrickBreakerBattleAssets/BrickBreakerBattle/Bricks/Golden Brick.png")
+        BlockTypes.append('C:\\Users\\calebt84\\Downloads\\BBB\\BrickBreakerBattle\\Bricks\\Golden Brick.png')
     #BlockTypes.append(random.choice(["Red", "Red", "Red", "Red", "Red", "Red", "Red", "Red", "Red", "Red", "Blue", "Blue", "Blue", "Blue", "Blue", "Blue", "Blue", "Blue", "Blue", "Blue", "Gold", "Purple", "Purple", "Purple", "Grey", "Grey", "Grey"]))
     XCoordVal += Block1.Width
     if XCoordVal + Block1.Width > Window_Width:
@@ -329,10 +331,12 @@ while running:
 
     #---BALL COLLISION WITH BLOCKS---
     if Ball1.y + Ball1.radius > Blocks[0][1] and Ball1.y < Blocks[len(Blocks) - 1][1] + Block1.Height: 
+        
         IncVal3 = 0
         for pos in Blocks[0:]:
             if IncVal3 < len(BlockTypes) and Ball1.x + (2 * Ball1.radius) > Blocks[IncVal3][0] and Ball1.x < Blocks[IncVal3][0] + Block1.Width and Ball1.y + (2 * Ball1.radius) > Blocks[IncVal3][1] and Ball1.y < Blocks[IncVal3][1] + Block1.Height:
-                if IncVal3 != LastBlock1_1: 
+                if IncVal3 != LastBlock1_1:
+                    BH.play(loops= 0, maxtime=0,fade_ms=0)
                     if LastBlock1_1 != LastBlock1_2:
                         LastBlock1_2 = LastBlock1_1
                     LastBlock1_1 = IncVal3   
@@ -358,10 +362,12 @@ while running:
                     IncVal3 = 0
             IncVal3 += 1
     if Ball2.y + Ball2.radius > Blocks[0][1] and Ball2.y < Blocks[len(Blocks) - 1][1] + Block1.Height:
+        
         IncVal4 = 0
         for pos in Blocks[0:]:
             if IncVal4 < len(BlockTypes) and Ball2.x + (2 * Ball2.radius) > Blocks[IncVal4][0] and Ball2.x < Blocks[IncVal4][0] + Block1.Width and Ball2.y + (2 * Ball2.radius) > Blocks[IncVal4][1] and Ball2.y < Blocks[IncVal4][1] + Block1.Height:
                 if IncVal4 != LastBlock2_1:    
+                    BH.play(loops= 0, maxtime=0,fade_ms=0)
                     if LastBlock2_1 != LastBlock2_2:
                         LastBlock2_2 = LastBlock2_1
                     LastBlock2_1 = IncVal4
